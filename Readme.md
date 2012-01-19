@@ -1,39 +1,85 @@
-Facebook/Heroku sample app -- PHP
-=================================
+We have created a new repository for this project: https://github.com/facebook/facebook-php-sdk.  Please update anything you have pointing at this repostory to this location before April 1, 2012.
 
-This is a sample app showing use of the Facebook Graph API, written in PHP, designed for deployment to [Heroku](http://www.heroku.com/).
+Facebook PHP SDK (v.3.1.1)
+==========================
 
-Run locally
------------
+The [Facebook Platform](http://developers.facebook.com/) is
+a set of APIs that make your app more social
 
-Configure Apache with a `VirtualHost` that points to the location of this code checkout on your system.
+This repository contains the open source PHP SDK that allows you to access Facebook Platform from your PHP app. Except as otherwise noted, the Facebook PHP SDK
+is licensed under the Apache Licence, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0.html)
 
-[Create an app on Facebook](https://developers.facebook.com/apps) and set the Website URL to your local VirtualHost.
 
-Copy the App ID and Secret from the Facebook app settings page into your `VirtualHost` config, something like:
+Usage
+-----
 
-    <VirtualHost *:80>
-        DocumentRoot /Users/adam/Sites/myapp
-        ServerName myapp.localhost
-        SetEnv FACEBOOK_APP_ID 12345
-        SetEnv FACEBOOK_SECRET abcde
-    </VirtualHost>
+The [examples][examples] are a good place to start. The minimal you'll need to
+have is:
 
-Restart Apache, and you should be able to visit your app at its local URL.
+    require 'facebook-php-sdk/src/facebook.php';
 
-Deploy to Heroku via Facebook integration
------------------------------------------
+    $facebook = new Facebook(array(
+      'appId'  => 'YOUR_APP_ID',
+      'secret' => 'YOUR_APP_SECRET',
+    ));
 
-The easiest way to deploy is to create an app on Facebook and click Cloud Services -> Get Started, then choose PHP from the dropdown.  You can then `git clone` the resulting app from Heroku.
+    // Get User ID
+    $user = $facebook->getUser();
 
-Deploy to Heroku directly
--------------------------
+To make [API][API] calls:
 
-If you prefer to deploy yourself, push this code to a new Heroku app on the Cedar stack, then copy the App ID and Secret into your config vars:
+    if ($user) {
+      try {
+        // Proceed knowing you have a logged in user who's authenticated.
+        $user_profile = $facebook->api('/me');
+      } catch (FacebookApiException $e) {
+        error_log($e);
+        $user = null;
+      }
+    }
 
-    heroku create --stack cedar
-    git push heroku master
-    heroku config:add FACEBOOK_APP_ID=12345 FACEBOOK_SECRET=abcde
+Login or logout url will be needed depending on current user state.
 
-Enter the URL for your Heroku app into the Website URL section of the Facebook app settings page, hen you can visit your app on the web.
+    if ($user) {
+      $logoutUrl = $facebook->getLogoutUrl();
+    } else {
+      $loginUrl = $facebook->getLoginUrl();
+    }
+
+[examples]: http://github.com/facebook/facebook-php-sdk/blob/master/examples/example.php
+[API]: http://developers.facebook.com/docs/api
+
+
+Tests
+-----
+
+In order to keep us nimble and allow us to bring you new functionality, without
+compromising on stability, we have ensured full test coverage of the SDK.
+We are including this in the open source repository to assure you of our
+commitment to quality, but also with the hopes that you will contribute back to
+help keep it stable. The easiest way to do so is to file bugs and include a
+test case.
+
+The tests can be executed by using this command from the base directory:
+
+    phpunit --stderr --bootstrap tests/bootstrap.php tests/tests.php
+
+
+Contributing
+===========
+For us to accept contributions you will have to first have signed the [Contributor License Agreement](https://developers.facebook.com/opensource/cla).
+
+When commiting, keep all lines to less than 80 characters, and try to follow the existing style.
+
+Before creating a pull request, squash your commits into a single commit.
+
+Add the comments where needed, and provide ample explanation in the commit message.
+
+
+Report Issues/Bugs
+===============
+[Bugs](https://developers.facebook.com/bugs)
+
+[Questions](http://facebook.stackoverflow.com)
 
